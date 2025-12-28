@@ -25,3 +25,13 @@ async function handleChat(message, model, chatId = null) {
     throw error;
   }
 }
+
+function nav() {
+  const menuBtn = document.getElementById("menuBtn");
+  const bg = window.getComputedStyle(menuBtn).getPropertyValue('background-image');
+  if (bg.includes('cross.png')) {
+    menuBtn.style.backgroundImage = 'url("hamburger.png")';
+  } else {
+    menuBtn.style.backgroundImage = 'url("cross.png")';
+  }
+}
