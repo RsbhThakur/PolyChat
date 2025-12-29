@@ -17,6 +17,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, "..", "frontend", "screen1.html"));
 });
+app.get('/screen2', (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "frontend", "screen2.html"));
+});
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // MongoDB Connection
