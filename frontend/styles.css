@@ -8,12 +8,16 @@
 .chatHistory {
     width: 258px;
     height: 100vh;
-    position: absolute;
+    position: fixed;
     border-right: 1px solid #ccc;
     left: 0;
     box-sizing: border-box;
     padding: 10px;
     background-color: #FFFFFF;
+}
+
+body{
+    background-color: #F0F2F5;
 }
 
 .chatArea {
@@ -239,7 +243,7 @@
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
     border: 1px solid #e0e2e7;
     overflow-x: auto;
-    width: 43%;
+    width: fit-content;
     justify-content: center;
 }
 
@@ -295,6 +299,22 @@ input:checked + .modelBtn:hover {
     top: 30%;
 }
 
+.searchContainer1Wrapper{
+    width: 100%;
+    background-color: #F0F2F5;
+    position: fixed;
+    bottom: 0;
+    height: 125px;
+}
+
+.searchContainer1 {
+    position: fixed;
+    width: 60%;
+    z-index: 20;
+    left: calc((100%-258px)/2);
+    bottom: 5%;
+}
+
 .searchGlow {
     position: absolute;
     inset: -.125rem;
@@ -341,6 +361,35 @@ input:checked + .modelBtn:hover {
     padding: 1rem 0;
     color: #333c4e;
     outline: none;
+}
+
+.searchInput1 {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 1.125rem;
+    padding: 1rem 0;
+    color: #333c4e;
+    outline: none;
+}
+
+.modelDropdown1{
+    border: none;
+    outline: none;
+    text-align: center;
+    width: min-content;
+    margin-left: 17px;
+    height: 50px;
+}
+
+.modelDropdown1:hover{
+    cursor: pointer;
+    background-color: #F5F6F8;
+}
+
+.icox{
+    position: absolute;
+    top: 25px
 }
 
 .searchActions {
@@ -477,4 +526,69 @@ input:checked + .modelBtn:hover {
         transform: scale(2);
         opacity: 0
     }
+}
+
+.screen{
+    width: 80%;
+    left: 12%;
+    position: absolute;
+    overflow-y: auto;
+}
+
+.prompt{
+    position: relative;
+    font-size: xx-large;
+    font-weight: 600;
+    color: #1a2e6b;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.basePromptLine{
+    height: 28px;
+    position: relative;
+    font-size: medium;
+    font-weight: 500;
+    text-align: left;
+    justify-content: left;
+    border-bottom: 1px solid #e0e2e7;
+}
+.basePromptLine::-webkit-scrollbar { display: none; }
+
+.logoPrompt{
+    background-color: #EFF6FF;
+    width: fit-content;
+}
+
+.modelInfo{
+    top: 0;
+    left: 30px;
+    position: absolute;
+    color: #42464f;
+}
+
+.copyReloadBtns{
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    gap: .5rem;
+}
+
+.baseLineBtns{
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color .2s;
+}
+
+.answerArea{
+    margin-top: 2rem;
+    margin-bottom: 10rem;
+    text-align: left;
+    font-size: large;
+    line-height: 1.6;
+    color: #333c4e;
 }
