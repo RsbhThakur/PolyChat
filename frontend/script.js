@@ -7,7 +7,6 @@ const chatArea = document.querySelector('.chatArea');
 const loader = document.querySelector('.loadContainer');
 const chatScreen = chatArea.children[0].children[0];
 const historyList = document.querySelector('.historyList');
-const maxChatLimit = 50;
 var chatId = (sessionStorage.getItem('chatId'))? sessionStorage.getItem('chatId'): 0;
 var chatDataResponse = getData();
 var chatData;
@@ -103,24 +102,14 @@ async function startChat(){
   showLoader();
   var model = getModel();
   var message = searchInput.value;
-  var newChatId;
-  for (let i = 0; i < maxChatLimit; i++){
-    if(!d[i]){
-      newChatId = i;
-      break;
-    } else{
-      newChatId = 0;
-    }
-  }
-  a = await handleChat(message+" :\n\nFormat the entire response as a HTML text to be placed inside an answerArea div in my document, dont give the outside answerArea div tag its already there, no css is requrired i have already done that also no margin padding required.", model, newChatId);
+  d = await getData();
+  a = await handleChat(message+" :\n\nFormat the entire response as a HTML text to be placed inside an answerArea div in my document, dont give the outside answerArea div tag its already there, no css is requrired i have already done that also no margin padding required.", model, d.length);
   var result = a.response;
   if (result == "Error handling chat") {
     result = a.error;
   }
-  d = await getData();
   postChat(JSON.stringify({title: message, messages: [{message: message, model: model, response: result}]}));
   window.location.href = "/screen2";
-
 }
 
 async function reStartChat(){
