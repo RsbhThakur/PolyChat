@@ -1,8 +1,38 @@
 const OpenAI = require("openai");
 const { GoogleGenAI } = require("@google/genai");
 const { CohereClientV2 } = require("cohere-ai");
+const mongoose = require("mongoose");
+const Chat = require('./model');
 const dotenv = require("dotenv");
 dotenv.config();
+
+const postData = async (req, res) => {
+  try{
+    const {title, messages} = req.body;
+    console.log(JSON.stringify({title: title, messages: messages}));
+    var newMsg = await Chat.findOne({title: title}).exec();
+    if(!newMsg){
+      newMsg = new Chat({title: title, messages: messages});
+    } else{
+      newMsg.messages = messages;
+    }
+    await newMsg.save();
+    res
+    .status(200)
+    .json({response: "Chat saved!"})
+  } catch (error){
+    res.json({ response: "Error handling chat", error: error.message });
+  }
+};
+
+const getData = async (req, res) => {
+  try{
+    const messages = await Chat.find();
+    res.json(messages);
+  } catch(error){
+    res.json({ response: "Error handling chat", error: error.message });
+  }
+};
 
 const handleChat = async (req, res) => {
   const { message, model, chatId } = req.body;
@@ -16,7 +46,6 @@ const handleChat = async (req, res) => {
           model: model,
           input: message,
         });
-        // console.log(response.output_text);
         res.json({model: model, response: response.output_text });
         
       }
@@ -30,7 +59,6 @@ const handleChat = async (req, res) => {
           model: model,
           contents: message,
         });
-        // console.log(response.text);
         res.json({ model: model, response: response.text });
       }
       await main();
@@ -50,10 +78,10 @@ const handleChat = async (req, res) => {
             },
           ],
         });
-        // console.log(response.message.content);
         res.json({model: model, response: response.message.content[0].text});
       }
       await main();
+
     }
   } catch (error) {
     res
@@ -62,5 +90,5 @@ const handleChat = async (req, res) => {
 };
 
 module.exports = {
-  handleChat,
+  handleChat, postData, getData
 };

@@ -2,18 +2,17 @@ const mongoose = require("mongoose");
 
 // Message Schema - Individual messages in a conversation
 const messageSchema = new mongoose.Schema({
-  role: {
-    type: String,
-    required: true,
-    enum: ["user", "assistant"],
-  },
-  content: {
+  message: {
     type: String,
     required: true,
   },
   model: {
     type: String,
     default: null,
+  },
+  response: {
+    type: String,
+    required: true,
   },
   timestamp: {
     type: Date,
