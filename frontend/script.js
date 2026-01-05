@@ -7,12 +7,15 @@ const chatArea = document.querySelector('.chatArea');
 const loader = document.querySelector('.loadContainer');
 const chatScreen = chatArea.children[0].children[0];
 const historyList = document.querySelector('.historyList');
-var chatId = (sessionStorage.getItem('chatId'))? sessionStorage.getItem('chatId'): 0;
-var chatDataResponse = getData();
 var chatData;
+chatDataResponse = getData();
 chatDataResponse.then(data=>{
   chatData = data;
 });
+var chatId = (sessionStorage.getItem('chatId'))? sessionStorage.getItem('chatId'): 0;
+const FACTUAL_KEYWORDS = ["what is", "what are", "who is", "who was", "when is", "when was", "where is", "where was", "define", "definition of", "meaning of", "full form of", "stands for", "abbreviation of", "overview of", "introduction to", "basic idea of", "explain briefly", "summary of", "diff ", "difference between", "differences between", "compare", "comparison of", "vs", "versus", "pros and cons", "advantages and disadvantages", "latest", "latest version", "current version", "release date", "introduced in", "first released", "history of", "origin of", "evolution of", "uses of", "applications of", "examples of", "real world examples", "use cases of"];
+const REASONING_KEYWORDS = ["why", "how", "explain in detail", "step by step", "reason behind", "logic behind", "working of", "flow of", "internal working", "debug", "debugging", "fix", "fix this", "error", "error message", "bug", "issue", "problem", "not working", "fails", "failure", "crash", "unexpected output", "code", "write code", "implement", "implementation", "function", "method", "algorithm", "pseudo code", "data structure", "logic implementation", "time complexity", "space complexity", "optimize", "optimization", "improve performance", "refactor", "efficiency", "design", "system design", "architecture", "approach", "strategy", "best approach", "best way", "trade offs"];
+const SIMPLE_KEYWORDS = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "thanks", "thank you", "ok", "okay", "cool", "nice", "yes", "no", "sure", "alright", "done", "got it", "understood", "sounds good"];
 function setChatId(title){
   for (let i = 0; i < chatData.length; i++) {
     if(title==chatData[i].title){
@@ -82,42 +85,63 @@ async function handleChat(message, model, chatId = null) {
   }
 }
 
-function getModel(){
-  let model;
+function getModel(prompt, messages){
+  var model;
   try {
-    for (let i = 0; i < modelContainer.children.length; i++) {
+    for (let i = 0; i < modelContainer.children.length ; i++) {
+      if (i==3) {
+        continue;
+      }
       if (modelContainer.children[i].children[0].checked) {
-        model = (i==0)? 'gpt-5-nano' : (i==1)? 'command-a-03-2025' : (i==2)? 'gemini-2.5-flash' :  'gpt-5-nano';
-        break;
+        if(i==3){
+          sessionStorage.setItem('autoModelUsed', 1);
+          model = autoAImodel(prompt, messages).model;
+          messages = autoAImodel(prompt, messages).messages;
+        } else{
+          sessionStorage.setItem('autoModelUsed', 0);
+          model = (i==0)? 'gpt-5-nano' : (i==1)? 'command-a-03-2025' : 'gemini-2.5-flash';
+        }
+        return {model: model, messages: messages}
       }
     }
   } catch (error) {
     let i = modelDropdown.selectedIndex;
-    model = (i==0)? 'gpt-5-nano' : (i==1)? 'command-a-03-2025' : (i==2)? 'gemini-2.5-flash' :  'gpt-5-nano';
+    if(i==3){
+      sessionStorage.setItem('autoModelUsed', 1);
+      model = autoAImodel(prompt, messages).model;
+      messages = autoAImodel(prompt, messages).messages;
+    } else{
+      sessionStorage.setItem('autoModelUsed', 0);
+      model = (i==0)? 'gpt-5-nano' : (i==1)? 'command-a-03-2025' : 'gemini-2.5-flash';
+    }
   }
-  return model;
+  return {model: model, messages:messages};
 }
 
 async function startChat(){
   showLoader();
-  var model = getModel();
   var message = searchInput.value;
   d = await getData();
+  var model = getModel(message, []).model;
   a = await handleChat(message+" :\n\nFormat the entire response as a HTML text to be placed inside an answerArea div in my document, dont give the outside answerArea div tag its already there, no css is requrired i have already done that also no margin padding required.", model, d.length);
   var result = a.response;
   if (result == "Error handling chat") {
     result = a.error;
   }
   postChat(JSON.stringify({title: message, messages: [{message: message, model: model, response: result}]}));
+  sessionStorage.setItem('chatId', d.length)
   window.location.href = "/screen2";
+
 }
 
 async function reStartChat(){
   showLoader();
-  var model = getModel();
   var message = searchInput1.value;
   var chatData = await getData();
-  var toAsk = `With reference to the following convo with the AI models given in sequence in the JSON form ${JSON.stringify(chatData)} Now Answer the following new question by the user: ${message}  :\n\nFormat the entire response as a HTML text to be placed inside an answerArea div in my document, dont give the outside answerArea div tag its already there, no css is requrired i have already done that also no margin padding required.`;
+  var messages = chatData[chatId].messages;
+  var model = getModel(message, messages).model;
+  var messages = getModel(message, messages).messages;
+  var toAsk = `With reference to the following convo with the AI models given in sequence in the JSON form ${JSON.stringify(messages)} Now Answer the following new question by the user: ${message}  :\n\nFormat the entire response as a HTML text to be placed inside an answerArea div in my document, dont give the outside answerArea div tag its already there, no css is requrired i have already done that also no margin padding required.`;
   a = await handleChat(toAsk, model, chatId);
   var result = a.response;
   if (result == "Error handling chat") {
@@ -125,18 +149,18 @@ async function reStartChat(){
   }
   chatData[chatId].messages.push({message: message, model: model, response: result});
   postChat(JSON.stringify(chatData[chatId]));
-  document.location.reload();
+  window.location.href = "/screen2";
 }
 try {
   searchInput.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       startChat();
     }
   });  
 } 
 catch (error) {
   searchInput1.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       reStartChat();
     }
   });  
@@ -172,8 +196,10 @@ document.addEventListener("DOMContentLoaded", function() {
                   ${response}
               </div>`;
         }
-        
-        i = (model.includes('gpt'))? 0 : (model.includes('command')) ? 1 : (model.includes('gemini')) ? 2 : 3;
+        if(parseInt(sessionStorage.getItem('autoModelUsed'))){ i=3; }
+        else{
+          i = (model.includes('gpt'))? 0 : (model.includes('command')) ? 1 : 2;
+        }
         modelDropdown.selectedIndex = i;
         const prompts = document.querySelectorAll('.prompt');
         const answers = document.querySelectorAll('.answerArea');
@@ -187,18 +213,40 @@ document.addEventListener("DOMContentLoaded", function() {
         window.scrollBy({top: toScroll, behavior: 'smooth'});
        }
     }
-  }, 100);
+  }, 200);
 });
 
 function redirect(){
   window.location.pathname = '/';
 }
 
-function func(){
-  alert("Hello world!")
-}
-
 function showLoader(){
   chatArea.style.display = "none";
   loader.style.display = "flex";
+}
+
+function autoAImodel(prompt, messages){
+  if(messages.length>8){
+    return {model: "command-a-03-2025", messages: messages.slice(-5)};
+  }
+  if(isFactual(prompt)){ return {model: "gemini-2.5-flash", messages: messages}; }
+  if(isSimple(prompt)){ return {model: "gpt-5-nano", messages: messages}; }
+  if(isReasoning(prompt)){ return {model: "command-a-03-2025", messages: messages}; }
+
+  return {model: "gpt-5-nano", messages:messages};
+}
+
+function isFactual(prompt){
+  const a = prompt.toLowerCase();
+  return FACTUAL_KEYWORDS.some(k => a.includes(k));
+}
+
+function isReasoning(prompt){
+  const a = prompt.toLowerCase();
+  return REASONING_KEYWORDS.some(k => a.includes(k));
+}
+
+function isSimple(prompt){
+  const a = prompt.toLowerCase();
+  return SIMPLE_KEYWORDS.some(k => a.includes(k));
 }
