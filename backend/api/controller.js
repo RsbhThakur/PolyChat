@@ -9,7 +9,6 @@ dotenv.config();
 const postData = async (req, res) => {
   try{
     const {title, messages} = req.body;
-    console.log(JSON.stringify({title: title, messages: messages}));
     var newMsg = await Chat.findOne({title: title}).exec();
     if(!newMsg){
       newMsg = new Chat({title: title, messages: messages});
