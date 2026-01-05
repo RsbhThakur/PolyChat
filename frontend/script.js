@@ -7,6 +7,7 @@ const chatArea = document.querySelector('.chatArea');
 const loader = document.querySelector('.loadContainer');
 const chatScreen = chatArea.children[0].children[0];
 const historyList = document.querySelector('.historyList');
+const N=8, K=5;
 var chatData;
 chatDataResponse = getData();
 chatDataResponse.then(data=>{
@@ -226,10 +227,11 @@ function showLoader(){
 }
 
 function autoAImodel(prompt, messages){
-  if(messages.length>8){
-    return {model: "command-a-03-2025", messages: messages.slice(-5)};
+  if(messages.length>N){
+    return {model: "command-a-03-2025", messages: messages.slice(-K)};
   }
   if(isFactual(prompt)){ return {model: "gemini-2.5-flash", messages: messages}; }
+  if(prompt.split(" ").length<K) { return {model: "gpt-5-nano", messages: messages}; }
   if(isSimple(prompt)){ return {model: "gpt-5-nano", messages: messages}; }
   if(isReasoning(prompt)){ return {model: "command-a-03-2025", messages: messages}; }
 
