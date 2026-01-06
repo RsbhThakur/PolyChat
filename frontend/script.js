@@ -94,7 +94,7 @@ function getModel(prompt, messages){
         continue;
       }
       if (modelContainer.children[i].children[0].checked) {
-        if(i==3){
+        if(i==4){
           sessionStorage.setItem('autoModelUsed', 1);
           model = autoAImodel(prompt, messages).model;
           messages = autoAImodel(prompt, messages).messages;
